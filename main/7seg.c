@@ -133,8 +133,56 @@ esp_err_t send_number(uint8_t number, uint8_t digit_position, uint8_t dp)
     return send_digit(encoding, digit_position);
 }
 
+uint8_t count_digits(uint16_t number)
+{
+    uint8_t digit_count = 0;
+    do {
+        number /= 10;
+        digit_count++;
+    } while (number > 0);
+
+    return (uint8_t)digit_count;
+    ESP_LOGI("7SEG", "Number of digits: %d", digit_count);
+}
+
 // configures the GPIO pins for the 7-segment display
 esp_err_t seven_seg_init(void)
 {
+    xTaskCreate(display_task, "display_task", 2048, NULL, 10, NULL); // Create a FreeRTOS task to handle display multiplexing
     return gpio_config(&io_7seg_conf);
+}
+
+uint16_t number_d;
+uint8_t dp_d;
+
+void set_display_number(uint16_t num, uint8_t decimal)
+{
+    number_d = num;
+    dp_d = decimal;
+}
+
+void display_task(void *arg)
+{
+    while(1)
+    {
+        if (number_d > 9999) {
+        ESP_LOGE("7SEG", "Invalid number: %d", number_d);
+    }
+    uint8_t digit_count = count_digits(number_d);
+    ESP_LOGI("7SEG", "Sending number: %d, starting at position: %d", number_d, digit_count);
+    
+
+    uint16_t digit = number_d;
+    for (uint8_t i = 0; i < digit_count; i++) {
+        
+        uint8_t current_digit = digit % 10;
+        send_number(current_digit, digit_count - i, dp_d);
+        vTaskDelay(pdMS_TO_TICKS(4));
+
+        digit /= 10;
+     
+    }
+
+        
+    }
 }
