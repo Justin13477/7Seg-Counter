@@ -90,5 +90,7 @@ void app_run()
     xTaskCreate(button_task, "button_task", 2048, NULL, 10, NULL); // Create a FreeRTOS task to handle button press events
     xTaskCreate(increment_counter_task, "increment_counter_task", 2048, NULL, 10, NULL); // Create a FreeRTOS task to handle counter increment on button press
 
+    set_display_number(5891, 0); // Initialize the 7-segment display with the initial counter value
+
     
 }

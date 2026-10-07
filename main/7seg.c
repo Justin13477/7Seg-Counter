@@ -177,7 +177,7 @@ void display_task(void *arg)
         
         uint8_t current_digit = digit % 10;
         send_number(current_digit, digit_count - i, dp_d);
-        vTaskDelay(pdMS_TO_TICKS(4));
+        vTaskDelay(pdMS_TO_TICKS(10));
 
         digit /= 10;
      
