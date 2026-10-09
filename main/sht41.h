@@ -5,12 +5,12 @@
 #include "freertos/queue.h"
 #include "esp_err.h"
 #include "esp_log.h"
-#include "driver/gpio.h"
 #include "i2c.h"
 
 #include <stdint.h>
 #include <stddef.h>
 
+//0x44 Bus Address
 #define SHT41_TEMP_MEASURE_CMD 0xFD // command for high precision temperature measurement
 
 esp_err_t sht41_init(i2c_port_t i2c_num);

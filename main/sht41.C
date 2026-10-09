@@ -1,6 +1,6 @@
 #include "sht41.h"
 
-i2c_master_bus_handle_t master_bus_handle;
+i2c_master_bus_handle_t sht41_master_bus_handle;
 i2c_master_dev_handle_t sht41_dev_handle;
 
 uint8_t sht41_data[6]; // buffer to hold sht41 data
@@ -14,7 +14,7 @@ float humidity_percent;
 uint8_t command = SHT41_TEMP_MEASURE_CMD; // command to send to sht41 sensor
 
 esp_err_t sht41_init(i2c_port_t i2c_num) {
-    master_bus_handle = get_i2c_master_bus_handle(i2c_num); // Get the I2C master bus handle for the specified I2C port
+    sht41_master_bus_handle = get_i2c_master_bus_handle(i2c_num); // Get the I2C master bus handle for the specified I2C port
 
     i2c_device_config_t sht41_dev_conf = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7, // 7-bit address length
@@ -23,7 +23,7 @@ esp_err_t sht41_init(i2c_port_t i2c_num) {
         .scl_wait_us = 0, // No wait time for SCL
         .flags = { .disable_ack_check = 0 } // Enable ACK check
     };
-    return i2c_master_bus_add_device(master_bus_handle, &sht41_dev_conf, &sht41_dev_handle); // Create a new I2C device for the SHT41 sensor
+    return i2c_master_bus_add_device(sht41_master_bus_handle, &sht41_dev_conf, &sht41_dev_handle); // Create a new I2C device for the SHT41 sensor
 
 }
 
@@ -56,14 +56,14 @@ esp_err_t sht41_read_data() {
     if(sht41_calculate_crc(sht41_data, 2) != sht41_data[2]) 
     {
         ESP_LOGE("SHT41", "Temperature CRC check failed");
-        //return ESP_ERR_INVALID_CRC; // CRC check failed
+        return ESP_ERR_INVALID_CRC; // CRC check failed
     }
     temperature_raw = (sht41_data[0] << 8 | sht41_data[1]);
 
     if(sht41_calculate_crc(&sht41_data[3], 2) != sht41_data[5])
     {
         ESP_LOGE("SHT41", "Humidity CRC check failed");
-        //return ESP_ERR_INVALID_CRC; // CRC check failed
+        return ESP_ERR_INVALID_CRC; // CRC check failed
     }
     humidity_raw = (sht41_data[3] << 8 | sht41_data[4]);
 
